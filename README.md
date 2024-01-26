@@ -8,9 +8,10 @@ Run the following command to install all required libraries:
 ```
 pip install -r requirements.text
 ```
-2. You need to create .env file that will contain all the information related to your Azure OpenAI models.
+2. You need to create .env file that will contain all the information related to your Azure OpenAI models.  
 
-Fill out your resource details as shown below:
+Fill out your resource details as shown below:  
+
   ![Env Varaibles](Images/env_image.png)
 
 Then we would load the env varaible and configure the embedding model.
