@@ -7,14 +7,6 @@ from dotenv import load_dotenv
 import os 
 import sys
 
-
-# We will be passing the file name as an argument when running the python script
-path = sys.argv[1]
-
-# Load the file and split it into pages. 
-loader = PyPDFLoader(path)
-pages = loader.load_and_split()
-
 #Load env variable and configure the embedding model
 load_dotenv()
 embedding_function = AzureOpenAIEmbeddings(
@@ -23,23 +15,38 @@ embedding_function = AzureOpenAIEmbeddings(
     openai_api_version="2023-05-15"
     )
 
-# Here we are saving our vector embedding database on the local storage. 
-db = Chroma.from_documents(pages, embedding_function, persist_directory=r".\chroma_db")
 
-query = "Tell me about Women's Health and Cancer Rights Act of 1998?"
+def load_pages():
+    # We will be passing all files as an argument when running the python script
+    paths = list(sys.argv[1:])
+    
+    for path in paths:
+        # Load the file and split it into pages. 
+        loader = PyPDFLoader(path)
+        pages = loader.load_and_split()
+        # Here we are saving our vector embedding database on the local storage. 
+        Chroma.from_documents(pages, embedding_function, persist_directory=r".\chroma_db")
 
-# Here we are loading our vector embedding database from the local storage. 
-db3 = Chroma(persist_directory="./chroma_db", embedding_function=embedding_function)
+def search_pages(query):
+    # Here we are loading our vector embedding database from the local storage. 
+    db3 = Chroma(persist_directory="./chroma_db", embedding_function=embedding_function)
 
+    # Here we are retrieving the data and chaining it to a completion AI model to summarize.
+    rag_chain = RetrievalQA.from_chain_type(
+        llm=AzureOpenAI(deployment_name=os.getenv("Completion_model"), openai_api_version="2023-05-15"),
+        retriever=db3.as_retriever(), 
+        return_source_documents=True
+    )
+    return rag_chain({"query": query})
 
-rag_chain = RetrievalQA.from_chain_type(
-    llm=AzureOpenAI(deployment_name=os.getenv("Completion_model"), openai_api_version="2023-05-15"),
-    retriever=db3.as_retriever(), 
-    return_source_documents=True
-)
+# Here we check if there are files passed or if the user wants to get informatoin from the already configured chromaDB. 
+if len(sys.argv[:]) > 1:
+    load_pages()
 
-result = rag_chain({"query": query})
-print(result["source_documents"][0].metadata['page'])
+query = input("What you would like to look for?\n")
+result = search_pages(query)
+
+print(result["source_documents"][0].metadata)
 print("-------------------------------------------")
 print(result["result"])
 print("-------------------------------------------")
