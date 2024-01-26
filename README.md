@@ -61,10 +61,10 @@ def search_pages(query):
     )
     return rag_chain({"query": query})
 ```
-We can pass the pdf files as follows:
+We can pass the pdf files as follows:  
 ![Python Command](Images/command.png)
 
-Then the terminal would ask us what we are looking for and we get the following output (Contains the source file and the page): 
+Then the terminal would ask us what we are looking for and we get the following output (Contains the source file and the page):   
 ![Output](Images/Output.png)
 
 
