@@ -2,3 +2,4 @@ openai
 python-dotenv 
 langchain
 chromadb
+pypdf
