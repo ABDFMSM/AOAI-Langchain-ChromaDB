@@ -29,12 +29,12 @@ def load_pages():
 
 def search_pages(query):
     # Here we are loading our vector embedding database from the local storage. 
-    db3 = Chroma(persist_directory="./chroma_db", embedding_function=embedding_function)
+    db = Chroma(persist_directory="./chroma_db", embedding_function=embedding_function)
 
     # Here we are retrieving the data and chaining it to a completion AI model to summarize.
     rag_chain = RetrievalQA.from_chain_type(
         llm=AzureOpenAI(deployment_name=os.getenv("Completion_model"), openai_api_version="2023-05-15"),
-        retriever=db3.as_retriever(), 
+        retriever=db.as_retriever(), 
         return_source_documents=True
     )
     return rag_chain({"query": query})
