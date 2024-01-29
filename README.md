@@ -12,10 +12,10 @@ In this repo I will be using Azure OpenAI, ChromaDB, and Langchain to retrieve u
 - [Step 1 - Installing the Requirements and Gettings Things Ready](https://github.com/ABDFMSM/AOAI-Langchain-ChromaDB?tab=readme-ov-file#step-1---installing-the-requirements-and-gettings-things-ready)  
 - [Step 2 - Loading Files and Storing it Locally](https://github.com/ABDFMSM/AOAI-Langchain-ChromaDB?tab=readme-ov-file#step-2---loading-the-files-and-storing-it-locally)  
 - [Step 3 - Sending a Query and Getting Results](https://github.com/ABDFMSM/AOAI-Langchain-ChromaDB?tab=readme-ov-file#step-3---sending-a-query-and-getting-results)  
-- [Step 4 - Getting User's Query and Providing the Answer with the Source]()  
+- [Step 4 - Getting User's Query and Providing the Answer with the Source](https://github.com/ABDFMSM/AOAI-Langchain-ChromaDB/tree/main?tab=readme-ov-file#step-4---getting-users-query-and-providing-the-answer-with-the-source)  
 
 
-## Step 1 - Installing the Requirements and Gettings Things Ready 
+## Step 1 - Installing the Requirements and Gettings Things Ready
 
 1. Initally, we would need to install the necessary python libraries for Azure OpenAI, chromadb, langchain, pypdf, and dotenv. 
 Run the following command to install all required libraries: 
