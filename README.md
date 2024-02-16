@@ -28,14 +28,14 @@ Fill out your resource details as shown below:
 
   ![Env Varaibles](Images/env_image.png)
 
-Then we would load the env varaible and configure the embedding model.
+Then we would load the env varaible and configure the AI models (embedding, completion, chat).
+I'll be using the embedding model to create vector database, completion model for the retrieval tool, and chat model for the chat agent. 
+
 ``` Python
 load_dotenv()
-embedding_function = AzureOpenAIEmbeddings(
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-    azure_deployment=os.getenv("Embedding_model"),
-    openai_api_version="2023-05-15"
-    )
+embedding_function = AzureOpenAIEmbeddings(azure_deployment=os.getenv("Embedding_model"))
+llm_completion = AzureOpenAI(deployment_name=os.getenv("Completion_model"))
+llm_chat = AzureChatOpenAI(deployment_name=os.getenv("Chat_model"), openai_api_version="2023-12-01-preview")
 ```
 
 ## Step 2 - Loading Files and Storing it Locally 
@@ -60,38 +60,56 @@ if len(sys.argv[:]) > 1:
 We can pass the pdf files as follows:  
 ![Python Command](Images/command.png)
 
-## Step 3 - Sending a Query and Getting Results
-Created a function to load the chromadb store, use Embedding fuction and return an answer to the query with metadata enabaled. 
+## Step 3 - Creating a retrieval tool and a chat Agent: 
+Loaded the chromadb store, created a retrieval tool and created chat Agent.
+I used a RetrievalQA class to be able to return the source documents. 
 
 ``` Python
-def search_pages(query):
-    # Here we are loading our vector embedding database from the local storage. 
-    db = Chroma(persist_directory="./chroma_db", embedding_function=embedding_function)
-    # Here we are retrieving the data and chaining it to a completion AI model to summarize.
-    rag_chain = RetrievalQA.from_chain_type(
-        llm=AzureOpenAI(deployment_name=os.getenv("Completion_model"), openai_api_version="2023-05-15"),
-        retriever=db.as_retriever(), 
-        return_source_documents=True
-    )
-    return rag_chain.invoke({"query": query})
+# Creating a retrieval tool for the agent.
+# Here we are loading our vector embedding database from the local storage 
+db = Chroma(persist_directory="./chroma_db", embedding_function=embedding_function)
+retriever = db.as_retriever()
+
+chain = RetrievalQA.from_chain_type(
+    llm=llm_completion, 
+    chain_type='stuff', 
+    retriever=retriever, 
+    return_source_documents=True, 
+    input_key="question")
+
+tool = Tool(
+    name="search_norhtWind_insurance",
+    func=lambda query: chain.invoke({"question": query}),
+    description="Use it to answer any questions related to insurance."
+)
+
+agent = create_openai_tools_agent(llm_chat, [tool], prompt)
+agent_executor = AgentExecutor(agent=agent, tools=[tool], memory=memory, verbose=False)
 ```
 
 ## Step 4 - Getting User's Query and Providing the Answer with the Source
-I have created an input_query funtion that uses a while loop to retrieve documents for the user until the mention exit. 
+I have created an input_query funtion that uses a while loop to retrieve documents for the user until the type exit. 
 ``` python
-def input_query():
-    query = input("What you would like to look for?\n")
-    while "exit" not in query:
-        result = search_pages(query)
-        print(result["source_documents"][0].metadata)
-        print("-------------------------------------------")
-        print(result["result"])
-        print("-------------------------------------------")
-        query = input("What else you would like to look for? if you don't have anything else to look for, type exit\n")
+def main(): 
+    if len(sys.argv[:]) > 1:
+        load_pages()
+
+    question = input("What do you like to ask?\n")
+
+    while "exit" not in question: 
+        result = agent_executor.invoke({"input": question})
+        print(result['output'])
+        question = input("\n")
 ```
 
-Then the terminal will keep asking the user what they are looking for and provide the following output (Contains the source file and the page):   
-![Output](Images/Output.png)
+The terminal will keep asking the user what they are looking for and provide the following output (Contains the source file and the page):
+One of the GPT feature is the ability to answer in any language used by the user. 
+
+
+https://github.com/ABDFMSM/AOAI-Langchain-ChromaDB/assets/133496062/fb4606b7-4168-4b67-9294-7480c3b0357e
+
+It takes some time to check the files stored in the vector database. 
+You can also see that it takes some time to response to questions asked in a different language (Arabic) 
 
 
 
