@@ -1,5 +1,7 @@
-openai
-python-dotenv 
-langchain
 chromadb
+langchain
+langchain-core
+langchain-openai
+openai
 pypdf
+python-dotenv 
