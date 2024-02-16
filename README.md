@@ -57,6 +57,8 @@ If there are files passed as an arguments with the python script it would be loa
 if len(sys.argv[:]) > 1:
     load_pages()
 ``` 
+We can pass the pdf files as follows:  
+![Python Command](Images/command.png)
 
 ## Step 3 - Sending a Query and Getting Results
 Created a function to load the chromadb store, use Embedding fuction and return an answer to the query with metadata enabaled. 
@@ -87,9 +89,6 @@ def input_query():
         print("-------------------------------------------")
         query = input("What else you would like to look for? if you don't have anything else to look for, type exit\n")
 ```
-
-We can pass the pdf files as follows:  
-![Python Command](Images/command.png)
 
 Then the terminal will keep asking the user what they are looking for and provide the following output (Contains the source file and the page):   
 ![Output](Images/Output.png)
